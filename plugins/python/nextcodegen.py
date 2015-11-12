@@ -1,18 +1,19 @@
 '''
-Python 2.7 Dia export plugin script.
+Python Dia export plug-in script.
+[Developed using Python 2.7]
 Next Code Gen(eration) on diagram export.
-An attenpt at a cleaner expression of producing and consuming a diagram's
+An attempt at a cleaner expression of producing and consuming a diagram's
 code generation internal representation.
 
 Currently only writes class diagrams as skeleton Python source.
-Enhances Python produced by the provided codegen.py plugin by taking note of
- a class's defined __init__ method and, if defined creating an __init__
+Enhances Python produced by the provided codegen.py plug-in by taking note of
+a class's defined __init__ method and, if defined creating an __init__
 method for the generated class matching the signature of the one in the
-Diagram. Further, if a provided __init__ method has parameters whose names
+diagram. Further, if a provided __init__ method has parameters whose names
 match that of class instance attribute then these are used to initialise the
-class instance attribute of the same name, thus a clas with an instance
- attribute 'attrib' and a __init__ method taking a parameter named 'attrib'
- will produce a line:
+class instance attribute of the same name, thus a class with an instance
+attribute 'attrib' and a __init__ method taking a parameter named 'attrib'
+will produce a line:
   self.attrib = attrib
 in the written __init__ method's definition.
 '''
@@ -22,12 +23,12 @@ import sys, dia
 class NCGenConfig:
   '''
   Module global configuration values - change to customise.
-  TODO: find some way to set these other than editting this file.
+  TODO: find some way to set these other than editing this file.
   '''
   indent = "  "
 
 def ConditionallyPrefix(prefix, value):
-  ''' Helper function to prefix a string with another only if it is not empty '''
+  ''' Prefix a string with another only if it is not empty '''
   return ''.join([prefix,value]) if value else ''
 
 class AttributeRepr:
@@ -63,7 +64,7 @@ class AttributeRepr:
 
 class ParameterRepr:
   '''
-  Internal representation of a classs operation parameter
+  Internal representation of a class operation parameter
   '''
   def __init__(self, param):
     '''
@@ -134,7 +135,7 @@ class ClassRepr:
   def __init__(self, classObject):
     '''
     Initialise instance attributes from the classObject parameter,
-    a Dia class value object
+    a Dia class object
     '''
     props = classObject.properties
     self.__name = props["name"].value
@@ -192,7 +193,7 @@ class ClassRepr:
 class ClassDiagRepr:
   '''
   Class diagram representation type.
-  Provides support for adding classes to the represetnation from a
+  Provides support for adding classes to the representation from a
   Dia-provided class object and accessing the resultant internal
   ClassRepr using subscript by name notation:
     cdr[clsName] = diaClassObject
@@ -201,7 +202,7 @@ class ClassDiagRepr:
   ClassDiagRepr is also an iterable type, providing an iterator that
   ensures the order of the ClassRepr objects returned represents classes
   in a base to derived ordering that is valid in so much as languages
-  generally require all a classs's bases classes to have been defined
+  generally require all a class's base classes to have been defined
   before it is.
   '''
   class __Node:
@@ -237,10 +238,10 @@ class ClassDiagRepr:
 
   def __init__(self):
     '''
-    Initialise classes collections.
-    Classes are represented as internal node s that contain a ClassRepr plus
+    Initialise class collections.
+    Classes are represented as internal nodes containing a ClassRepr plus
     additional housekeeping data. The nodes are stored in two collections:
-    - a dictionaly keyed by class name that forms the direct access view
+    - a dictionary keyed by class name that forms the direct access view
     - a sorted list of classes used when iterating over the class nodes
       in base before derived order.
     '''
@@ -254,7 +255,7 @@ class ClassDiagRepr:
   def __setitem__(self,name,value):
     '''
     Add a class representation node to a ClassDiagRepr object.
-    Note: that derivation depth information for the node is calculated
+    Note: derivation depth information for the node is calculated
     for use in producing a sorted by derivation list of nodes that
     can be iterated over.
     '''
@@ -264,8 +265,8 @@ class ClassDiagRepr:
     self.classes[name] = node
   def __iter__(self):
     '''
-    Return an instance of the internal iterator type ensuring the required derivation
-    depth sorted sequence of class repesentation nodes is produced.
+    Return an instance of the internal iterator type ensuring the required
+    derivation depth sorted sequence of class representation nodes is produced.
     '''
     if not self.sorted:
       self.sorted = sorted(self.classes, key=lambda name: self.classes[name].depth)
@@ -284,7 +285,7 @@ class CodeGenRepr:
   '''
   def __init__(self, diagram, filename):
     '''
-    Store passed filename and use pased diagram object to
+    Stores passed filename and uses passed diagram object to
     extract and create the internal code generation representation.
     '''
     self.__dia = diagram
@@ -323,9 +324,12 @@ class CodeGenRepr:
 class CodeGenRenderer:
   '''
   Dia export renderer. 
-  Hands processing over to a class whose instances are a code generation representation
-  of a diagram and a code writing class, an instance of which is created from an
-  instance of the representation class and writes out the generated code.
+  Hands processing over to instances of:
+   - diagramReprClass : 
+  a class whose instances are a code generation
+  representation of a diagram and a code writing class, an instance of which
+  is created from an instance of the representation class and writes out the
+  generated code.
   '''
   def __init__(self, codeWriterClass, diagramReprClass=CodeGenRepr):
     self.writerClass = codeWriterClass
@@ -355,7 +359,7 @@ class PythonWriter:
   def __init__(self, repr):
     '''
     Opens file specified in repr and writes a Python version of the
-    the clases represented by repr.
+    the classes represented by repr.
     '''
     self.out = open(repr.Filename(),"w")
     self.out.write("# Generated by Dia via nextcodegen.py\n")
@@ -443,8 +447,8 @@ class PythonWriter:
 
 class PythonCodeGenRenderer(CodeGenRenderer):
   '''
-  Utility subclass of CodeGenRenderer that hardwires the writer class to be
-  PythonWriter - to write Python code.
+  Python specific subclass of CodeGenRenderer that hard-wires
+  the writer class to be PythonWriter.
   '''
   def __init__(self):
     CodeGenRenderer.__init__(self, PythonWriter)
