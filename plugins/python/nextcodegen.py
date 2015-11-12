@@ -7,15 +7,14 @@ code generation internal representation.
 
 Currently only writes class diagrams as skeleton Python source.
 Enhances Python produced by the provided codegen.py plug-in by taking note of
-a class's defined __init__ method and, if defined creating an __init__
+a class's defined __init__ method and, if defined, creating an __init__
 method for the generated class matching the signature of the one in the
 diagram. Further, if a provided __init__ method has parameters whose names
-match that of class instance attribute then these are used to initialise the
-class instance attribute of the same name, thus a class with an instance
-attribute 'attrib' and a __init__ method taking a parameter named 'attrib'
-will produce a line:
+match that of a class instance attribute then these are used to initialise that
+attribute, thus a class with an instance attribute 'attrib' and a __init__
+method taking a parameter named 'attrib' will produce a line:
   self.attrib = attrib
-in the written __init__ method's definition.
+in the generated __init__ method's definition.
 '''
 
 import sys, dia
@@ -32,9 +31,7 @@ def ConditionallyPrefix(prefix, value):
   return ''.join([prefix,value]) if value else ''
 
 class AttributeRepr:
-  '''
-  Internal representation of a class attribute
-  '''
+  ''' Internal representation of a class attribute '''
   def __init__(self, attrib):
     '''
     Initialise instance attributes from the attrib parameter,
@@ -63,9 +60,7 @@ class AttributeRepr:
     return self.__hasClassScope
 
 class ParameterRepr:
-  '''
-  Internal representation of a class operation parameter
-  '''
+  ''' Internal representation of a class operation parameter '''
   def __init__(self, param):
     '''
     Initialise instance attributes from the param parameter,
@@ -88,9 +83,7 @@ class ParameterRepr:
     return self.__kind
 
 class OperationRepr:
-  '''
-  Internal representation of a class operation (method, member function etc.)
-  '''
+  ''' Internal representation of a class operation '''
   def __init__(self, op):
     '''
     Initialise instance attributes from the op parameter,
@@ -248,9 +241,7 @@ class ClassDiagRepr:
     self.classes = {}
     self.sorted = None
   def __getitem__(self, name):
-    '''
-    Return the ClassRepr object associated with the passed class name.
-    '''
+    ''' Return the ClassRepr object associated with the passed class name. '''
     return self.classes[name].clsRepr
   def __setitem__(self,name,value):
     '''
@@ -280,9 +271,7 @@ class ClassDiagRepr:
     return max_super_depth + 1
   
 class CodeGenRepr:
-  '''
-  Top level code generation representation type for a Dia diagram.
-  '''
+  ''' Top level code generation representation type for a Dia diagram. '''
   def __init__(self, diagram, filename):
     '''
     Stores passed filename and uses passed diagram object to
@@ -305,9 +294,7 @@ class CodeGenRepr:
   def __ProcessClassObject(self, object):
     self.__classes[object.properties["name"].value] = object
   def Filename(self):
-    '''
-    Returns the file name to write generated code to
-    '''
+    ''' Returns the file name to write generated code to '''
     return self.__fname
   def Classes(self):
     '''
@@ -316,9 +303,7 @@ class CodeGenRepr:
     '''
     return self.__classes
   def ClassesDiagram(self):
-    '''
-    Return the original Dia diagram object passed to __init__
-    '''
+    ''' Return the original Dia diagram object passed to __init__ '''
     return self.__dia
  
 class CodeGenRenderer:
@@ -353,9 +338,7 @@ class CodeGenRenderer:
     self.repr = None # Indicate representation resources are garbage
 
 class PythonWriter:
-  '''
-  Code writer class for Python.
-  '''
+  ''' Code writer class for Python. '''
   def __init__(self, repr):
     '''
     Opens file specified in repr and writes a Python version of the
@@ -446,13 +429,9 @@ class PythonWriter:
       self.out.write("%s''' %s '''\n" % (indent, comment))
 
 class PythonCodeGenRenderer(CodeGenRenderer):
-  '''
-  Python specific subclass of CodeGenRenderer that hard-wires
-  the writer class to be PythonWriter.
-  '''
+  ''' Python specific CodeGenRenderer subclass '''
   def __init__(self):
     CodeGenRenderer.__init__(self, PythonWriter)
 
 # Register the code generation export renderers with Dia
 dia.register_export ("Next Gen Dia Code Generation (Python)", "py", PythonCodeGenRenderer())
-
